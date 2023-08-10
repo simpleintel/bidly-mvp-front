@@ -4,7 +4,7 @@ import React from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, message, Upload } from 'antd';
 import axios from 'axios'
-import { Image } from 'antd';
+import { Image, Alert } from 'antd';
 
 
 const headingStyles = {
@@ -15,6 +15,7 @@ const headingStyles = {
 
 const IndexPage = () => {
   const [pdfFile, setPdfFile] = useState([])
+  const [messageSuccess, setMessageSuccess] = useState(null)
 
   useEffect(() => {
     axios.get('http://ec2-13-53-130-22.eu-north-1.compute.amazonaws.com:5000/get_image/A-803_-_UNIT_KITCHEN_ELEVATIONS_0.jpg').then((response) => {
@@ -35,8 +36,6 @@ const IndexPage = () => {
     return isPNG || Upload.LIST_IGNORE;
   }
 
-
-
   const handleUpload = (info) => {
     if (info.fileList.length > 0) {
       const formData = new FormData();
@@ -51,16 +50,13 @@ const IndexPage = () => {
             'Authorization': 'xxx'
           }
         }).then((response) => {
-          console.log('response', response);
+          console.log('response', response.status);
+          setMessageSuccess(response.status)
         }).catch((error) => {
           console.log('error', error);
         });
-
-
       }
     }
-
-
   }
 
   return (
@@ -72,10 +68,15 @@ const IndexPage = () => {
       <div>
         <h1 style={headingStyles}>
           Upload PDF File
+          {messageSuccess === 200 ? (
+            <Alert message="Success PDF Upload" type="success" />
+          ) : (
+            <Alert message="Error in PDF Upload" type="error" />
+          ) }
           <br />
         </h1>
         <Upload beforeUpload={beforeUpload} onChange={handleUpload}>
-          <Button icon={<UploadOutlined />}>Upload png only</Button>
+          <Button icon={<UploadOutlined />}>Upload PDF only</Button>
         </Upload>
       </div>
     </main>
