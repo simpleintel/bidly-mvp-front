@@ -6,12 +6,6 @@ import { Button, message, Upload, notification } from 'antd';
 import axios from 'axios'
 import { Image, Spin } from 'antd';
 
-const headingStyles = {
-  marginTop: 0,
-  marginBottom: 64,
-  maxWidth: 320,
-}
-
 const IndexPage = () => {
   const [pdfFile, setPdfFile] = useState([])
   const [fileList, setFileList] = useState([])
@@ -92,7 +86,7 @@ const IndexPage = () => {
         </h1>
       <div style={{ width: '200px', margin: 'auto' }}>
 
-      <Upload  {...props} onRemove={onRemove}>
+      <Upload  {...props} onRemove={onRemove} maxCount={1}>
           <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
         </Upload>
         
