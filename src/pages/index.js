@@ -13,6 +13,7 @@ const IndexPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [api, contextHolder] = notification.useNotification();
   const [uploadInProgress, setUploadInProgress] = useState(false);
+  const [uid, setUid] = useState(null);
 
   const props = {
 
@@ -25,15 +26,15 @@ const IndexPage = () => {
       return isPNG || Upload.LIST_IGNORE;
     },
     onChange(info) {
-      if (uploadInProgress) {
+      if (uploadInProgress && uid === info.file.uid) {
         // Ignore onChange while an upload is already in progress
         return;
       }
-
       setUploadInProgress(true);
       setIsLoading(true)
+      setUid(info.file.uid)
 
-      if (!uploadInProgress && info.fileList.length > 0) {
+      if (uid !== info.file.uid && info.fileList.length > 0) {
         const formData = new FormData();
         formData.append('file', info.fileList[0].originFileObj);
         if (info) {
@@ -101,7 +102,7 @@ const IndexPage = () => {
             <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
           </Upload>
 
-          {isLoading && <Spin style={{ marginTop: '24px' }} size="large" />}
+          {isLoading && <Spin style={{ marginTop: '24px', marginBottom: '24px'}} size="large" />}
 
         </div>
       </div>
