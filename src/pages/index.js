@@ -65,7 +65,7 @@ const IndexPage = () => {
   }
 
   useEffect(() => {
-    if (messageSuccess) {
+    if (messageSuccess === true) {
       openNotificationWithIcon('success')
     }
     if (messageSuccess === false) {
@@ -73,7 +73,7 @@ const IndexPage = () => {
 
     }
 
-  }, [messageSuccess])
+  }, [pdfFile])
 
   const onRemove = (file) => {
     setFileList(fileList.filter((f) => f !== file));
