@@ -9,6 +9,9 @@
 
 ## 🚀 Quick start
 
+
+pm2 start npm --name "web-app" -- start develop
+
 1.  **Create a Gatsby site.**
 
     Use the Gatsby CLI to create a new site, specifying the minimal starter.
