@@ -102,19 +102,29 @@ const IndexPage = () => {
             <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
           </Upload>
 
-          {isLoading && <Spin style={{ marginTop: '24px', marginBottom: '24px'}} size="large" />}
+          {isLoading && <Spin style={{ marginTop: '24px', marginBottom: '24px' }} size="large" />}
 
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '70%', margin: 'auto' }} >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '70%', margin: 'auto', }} >
 
         {pdfFile.map((list, index) => (
-          <Image
-            key={index}
-            width={500}
-            src={list}
-          />
+          <div key={index} style={{ flexDirection: 'column', marginBottom: '24px' }}>
+
+            <Image
+              width={500}
+              src={list.kitchen_url}
+              style={{ marginLeft: '16px' }}
+            />
+
+            <Image
+              width={500}
+              src={list.cabinet_urls}
+            />
+
+            <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {list.num_cabinets}</p>
+          </div>
         ))}
 
       </div>
