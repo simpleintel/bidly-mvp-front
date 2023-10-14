@@ -4,6 +4,7 @@ import axios from 'axios'
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, message, Upload, notification } from 'antd';
 import { Image, Spin } from 'antd';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const IndexPage = () => {
   const [pdfFile, setPdfFile] = useState([])
@@ -15,6 +16,19 @@ const IndexPage = () => {
   const [uploadInProgress, setUploadInProgress] = useState(false);
   const [uid, setUid] = useState(null);
 
+
+  const bucketName = 'bidly-storage-s3-bucket'
+  const bucketRegion = 'eu-north-1'
+  const accessKey = 'AKIATQKK2HKFOD4ZEY76'
+  const secretAccessKey = `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`
+  const client = new S3Client({ 
+    credentials: {
+      accessKeyId: accessKey,
+      secretAccessKey: String(secretAccessKey)
+      }, 
+    region: bucketRegion
+    });
+
   const props = {
 
     beforeUpload(file) {
@@ -25,7 +39,8 @@ const IndexPage = () => {
       }
       return isPNG || Upload.LIST_IGNORE;
     },
-    onChange(info) {
+      async onChange(info) {
+
       if (uploadInProgress && uid === info.file.uid) {
         // Ignore onChange while an upload is already in progress
         return;
@@ -38,6 +53,17 @@ const IndexPage = () => {
         const formData = new FormData();
         formData.append('file', info.fileList[0].originFileObj);
         if (info) {
+          const params = {
+            Bucket: bucketName,
+            Key: info?.fileList[0].originFileObj.toString(),
+            Body: formData,
+          };
+          const command = new PutObjectCommand(params);
+          try {
+            const data = await client.send(command);
+          } catch (error) {
+            console.log('error', error)
+          } 
 
           axios.post('http://ec2-13-53-130-22.eu-north-1.compute.amazonaws.com:5000/upload', formData, {
             headers: {
@@ -51,12 +77,11 @@ const IndexPage = () => {
             setdisplayMessage(response.data.success_message)
 
           }).catch((error) => {
-            console.log('error', error)
-            setdisplayMessage(response.data.error_message)
+            setdisplayMessage(error)
             setMessageSuccess(false)
             setIsLoading(false)
-            setFileList(info.fileList.filter((file) => file !== info.fileList[0]));
-            props.beforeUpload(info.fileList[0]);
+            // setFileList(info?.fileList.filter((file) => file !== info.fileList[0]));
+            // props.beforeUpload(info?.fileList[0]);
           });
         }
       }
