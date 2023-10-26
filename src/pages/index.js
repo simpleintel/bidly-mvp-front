@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import React from 'react';
 import axios from 'axios'
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, message, Upload, notification } from 'antd';
 import { Image, Spin } from 'antd';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -14,20 +14,22 @@ const IndexPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [api, contextHolder] = notification.useNotification();
   const [uploadInProgress, setUploadInProgress] = useState(false);
+  const [isPdfView, setIsPdfView] = useState(false)
+  const [pdfDisplayList, setPdfDisplayList] = useState([])
+
   const [uid, setUid] = useState(null);
 
-
-  const bucketName = 'bidly-storage-s3-bucket'
-  const bucketRegion = 'eu-north-1'
-  const accessKey = 'AKIATQKK2HKFOD4ZEY76'
-  const secretAccessKey = `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`
-  const client = new S3Client({ 
+  const bucketName = 'bidly-data'
+  const bucketRegion = 'us-east-1'
+  const accessKey = 'AKIAZDO4IOGWVVK7DRX4'
+  const secretAccessKey = `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`
+  const client = new S3Client({
     credentials: {
       accessKeyId: accessKey,
       secretAccessKey: String(secretAccessKey)
-      }, 
+    },
     region: bucketRegion
-    });
+  });
 
   const props = {
 
@@ -39,66 +41,89 @@ const IndexPage = () => {
       }
       return isPNG || Upload.LIST_IGNORE;
     },
-      async onChange(info) {
+    async onChange(info) {
 
       if (uploadInProgress && uid === info.file.uid) {
-        // Ignore onChange while an upload is already in progress
         return;
       }
       setUploadInProgress(true);
       setIsLoading(true)
       setUid(info.file.uid)
-
+      let clientSend;
       if (uid !== info.file.uid && info.fileList.length > 0) {
         const formData = new FormData();
-        formData.append('file', info.fileList[0].originFileObj);
+        formData.append('pdf_url', info.fileList[0].originFileObj.name);
+
+        // formData.append('pdf_url', fs.createReadStream(info.fileList[0].originFileObj));
         if (info) {
           const params = {
             Bucket: bucketName,
-            Key: info?.fileList[0].originFileObj.toString(),
+            Key: info.fileList[0].originFileObj.name,
             Body: formData,
           };
           const command = new PutObjectCommand(params);
           try {
-            const data = await client.send(command);
+            clientSend = await client.send(command);
           } catch (error) {
             console.log('error', error)
-          } 
+          }
+          if (clientSend) {
+            setMessageSuccess(true);
 
-          axios.post('http://ec2-13-53-130-22.eu-north-1.compute.amazonaws.com:5000/upload', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              'Authorization': 'xxx'
+            setdisplayMessage('Successfully Upload')
+
+            setIsLoading(false);
+          } else {
+            setMessageSuccess(false);
+
+            setdisplayMessage('Something went wrong!')
+          }
+          if (clientSend) {
+            const detectResponse = await axios.post('http://34.203.12.157:5000/detect', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': 'xxx'
+              },
+            })
+            let fetchResponse
+            if (detectResponse) {
+              fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`, formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                  'Authorization': 'xxx'
+                },
+              })
+              setPdfFile(fetchResponse.data.result);
+
             }
-          }).then((response) => {
-            setMessageSuccess(response.data.issuccess)
-            setIsLoading(false)
-            setPdfFile(response.data.results)
-            setdisplayMessage(response.data.success_message)
 
-          }).catch((error) => {
-            setdisplayMessage(error)
-            setMessageSuccess(false)
-            setIsLoading(false)
-            // setFileList(info?.fileList.filter((file) => file !== info.fileList[0]));
-            // props.beforeUpload(info?.fileList[0]);
-          });
+            if (fetchResponse?.data.result !== null) {
+              setMessageSuccess(true);
+
+              setdisplayMessage('Successfully Upload')
+              setIsLoading(false);
+            } else {
+              setMessageSuccess(false);
+
+              setdisplayMessage('No pdf display data!')
+            }
+          }
+
         }
       }
     }
 
   }
-
   useEffect(() => {
     if (messageSuccess === true) {
       openNotificationWithIcon('success')
-    }
-    if (messageSuccess === false) {
+
+    } else {
       openNotificationWithIcon('error')
 
     }
 
-  }, [pdfFile])
+  }, [messageSuccess])
 
   const onRemove = (file) => {
     setFileList(fileList.filter((f) => f !== file));
@@ -111,6 +136,18 @@ const IndexPage = () => {
         '',
     });
   };
+
+
+  const handlePdflists = (list) => {
+    setPdfDisplayList(list)
+    setIsPdfView(true)
+
+  }
+
+  const handleReturn = () => {
+    setIsPdfView(false)
+
+  }
   return (
 
     <div >
@@ -131,28 +168,41 @@ const IndexPage = () => {
 
         </div>
       </div>
+      <div style={{ width: '70%', margin: 'auto' }}>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '70%', margin: 'auto', }} >
+        {isPdfView ? (
+          <div>
+            <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
+            <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'row', 'justifyContent': 'space-between' }}>
+              {pdfDisplayList?.elevation_urls?.map((list, index) => (
+                <div key={index} >
+                  <div style={{ marginRight: '18px' }}>
+                    <Image
+                      width={500}
+                      src={list}
+                      style={{ marginLeft: '16px' }}
+                    />
+                    <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[index]}</p>
+                    <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-        {pdfFile.map((list, index) => (
-          <div key={index} style={{ flexDirection: 'column', marginBottom: '24px' }}>
-
-            <Image
-              width={500}
-              src={list.kitchen_url}
-              style={{ marginLeft: '16px' }}
-            />
-
-            <Image
-              width={500}
-              src={list.cabinet_urls}
-            />
-
-            <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {list.num_cabinets}</p>
           </div>
-        ))}
+        )
+          :
 
+          (<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '70%', margin: 'auto' }}>
+            {pdfFile?.map((list, index) => (
+              <div key={index} style={{ marginBottom: '24px', width: 'calc(50% - 18px)' }}>
+                <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>{list.elevation_urls[0]}</p>
+              </div>
+            ))}
+          </div>)
+        }
       </div>
+
     </div>
 
   )
