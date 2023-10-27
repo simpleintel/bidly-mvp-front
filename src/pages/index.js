@@ -79,7 +79,7 @@ const IndexPage = () => {
             setdisplayMessage('Something went wrong!')
           }
           if (clientSend) {
-            const detectResponse = await axios.post('https://34.203.12.157:5000/detect', formData, {
+            const detectResponse = await axios.post('https://ec2-34-203-12-157.compute-1.amazonaws.com:5000/detect', formData, {
               headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': 'xxx'
@@ -87,7 +87,7 @@ const IndexPage = () => {
             })
             let fetchResponse
             if (detectResponse) {
-              fetchResponse = await axios.get(`https://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`, formData, {
+              fetchResponse = await axios.get(`https://ec2-34-203-12-157.compute-1.amazonaws.com:5000/fetch_result/${detectResponse?.data?.task_id}`, formData, {
                 headers: {
                   'Content-Type': 'multipart/form-data',
                   'Authorization': 'xxx'
