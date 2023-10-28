@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import React from 'react';
 import axios from 'axios'
 import { UploadOutlined, ArrowLeftOutlined } from '@ant-design/icons';
@@ -9,8 +9,6 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 const IndexPage = () => {
   const [pdfFile, setPdfFile] = useState([])
   const [fileList, setFileList] = useState([])
-  const [messageSuccess, setMessageSuccess] = useState(null)
-  const [displayMessage, setdisplayMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [api, contextHolder] = notification.useNotification();
   const [uploadInProgress, setUploadInProgress] = useState(false);
@@ -68,15 +66,13 @@ const IndexPage = () => {
             console.log('error', error)
           }
           if (clientSend) {
-            setMessageSuccess(true);
+            openNotificationWithIcon('success')
 
-            setdisplayMessage('Successfully Upload')
 
             setIsLoading(false);
           } else {
-            setMessageSuccess(false);
+            openNotificationWithIcon('error')
 
-            setdisplayMessage('Something went wrong!')
           }
           if (clientSend) {
             const detectResponse = await axios.post('https://ec2-34-203-12-157.compute-1.amazonaws.com:5000/detect', formData, {
@@ -98,14 +94,10 @@ const IndexPage = () => {
             }
 
             if (fetchResponse?.data.result !== null) {
-              setMessageSuccess(true);
 
-              setdisplayMessage('Successfully Upload')
-              setIsLoading(false);
+              openNotificationWithIcon('success')
             } else {
-              setMessageSuccess(false);
-
-              setdisplayMessage('No pdf display data!')
+              openNotificationWithIcon('error')
             }
           }
 
@@ -114,29 +106,26 @@ const IndexPage = () => {
     }
 
   }
-  useEffect(() => {
-    if (messageSuccess === true) {
-      openNotificationWithIcon('success')
-
-    } else {
-      openNotificationWithIcon('error')
-
-    }
-
-  }, [messageSuccess])
+ 
 
   const onRemove = (file) => {
     setFileList(fileList.filter((f) => f !== file));
   };
 
   const openNotificationWithIcon = (type) => {
+    let message;
+  
+    if (type === 'success') {
+      message = 'Successfully Upload';
+    } else if (type === 'error') {
+      message = 'No pdf display data!';
+    }
+  
     api[type]({
-      message: displayMessage,
-      description:
-        '',
+      message,
+      description: '',
     });
   };
-
 
   const handlePdflists = (list) => {
     setPdfDisplayList(list)
