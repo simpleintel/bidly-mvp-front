@@ -83,13 +83,8 @@ const IndexPage = () => {
               },
             })
             let fetchResponse
-            if (detectResponse) {
-              fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`, formData, {
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                  'Authorization': 'xxx'
-                },
-              })
+            if (detectResponse.data.task_id !== null || detectResponse.data.task_id !== '') {
+              fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`)
               setPdfFile(fetchResponse.data.result);
 
             }
