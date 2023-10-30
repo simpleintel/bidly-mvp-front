@@ -69,7 +69,6 @@ const IndexPage = () => {
             openNotificationWithIcon('success')
 
 
-            setIsLoading(false);
           } else {
             openNotificationWithIcon('error')
 
@@ -85,9 +84,8 @@ const IndexPage = () => {
             let fetchResponse
             if (detectResponse.data.task_id !== null || detectResponse.data.task_id !== '') {
               fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`)
-     
-              while(fetchResponse.data.result === null)
-              {
+
+              while (fetchResponse.data.result === null) {
                 fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`)
                 setPdfFile(fetchResponse.data.result);
 
@@ -95,6 +93,7 @@ const IndexPage = () => {
             }
 
             if (fetchResponse?.data.result !== null) {
+              setIsLoading(false);
 
               openNotificationWithIcon('success')
             } else {
@@ -107,7 +106,7 @@ const IndexPage = () => {
     }
 
   }
- 
+
 
   const onRemove = (file) => {
     setFileList(fileList.filter((f) => f !== file));
@@ -115,13 +114,13 @@ const IndexPage = () => {
 
   const openNotificationWithIcon = (type) => {
     let message;
-  
+
     if (type === 'success') {
       message = 'Successfully Upload';
     } else if (type === 'error') {
       message = 'No pdf display data!';
     }
-  
+
     api[type]({
       message,
       description: '',
@@ -158,14 +157,14 @@ const IndexPage = () => {
 
         </div>
       </div>
-      <div style={{ width: '70%', margin: 'auto' }}>
+      <div >
 
         {isPdfView ? (
-          <div>
+          <div style={{ width: '90%', margin: 'auto' }}>
             <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
-            <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'row', 'justifyContent': 'space-between' }}>
+            <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
               {pdfDisplayList?.elevation_urls?.map((list, index) => (
-                <div key={index} >
+                <div key={index} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
                   <div style={{ marginRight: '18px' }}>
                     <Image
                       width={500}
@@ -183,10 +182,10 @@ const IndexPage = () => {
         )
           :
 
-          (<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '70%', margin: 'auto' }}>
+          (<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
             {pdfFile?.map((list, index) => (
-              <div key={index} style={{ marginBottom: '24px', width: 'calc(50% - 18px)' }}>
-                <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>{list.elevation_urls[0]}</p>
+              <div key={index} style={{ margin: '12px' }}>
+                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>{list.elevation_urls[0]}</p>
               </div>
             ))}
           </div>)
