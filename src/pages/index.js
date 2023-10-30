@@ -50,13 +50,13 @@ const IndexPage = () => {
       let clientSend;
       if (uid !== info.file.uid && info.fileList.length > 0) {
         const formData = new FormData();
-        formData.append('pdf_url', info.fileList[0].originFileObj.name);
+        formData.append('pdf_url', info.fileList[0].originFileObj);
 
         // formData.append('pdf_url', fs.createReadStream(info.fileList[0].originFileObj));
         if (info) {
           const params = {
             Bucket: bucketName,
-            Key: info.fileList[0].originFileObj,
+            Key: info.fileList[0].originFileObj.name,
             Body: formData,
           };
           const command = new PutObjectCommand(params);
@@ -75,6 +75,7 @@ const IndexPage = () => {
 
           }
           if (clientSend) {
+            formData.append('pdf_url', info.fileList[0].originFileObj.name);
             const detectResponse = await axios.post('http://34.203.12.157:5000/detect', formData, {
               headers: {
                 'Content-Type': 'multipart/form-data',
