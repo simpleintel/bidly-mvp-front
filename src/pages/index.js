@@ -183,11 +183,15 @@ const IndexPage = () => {
           :
 
           (<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
-            {pdfFile?.map((list, index) => (
+            {pdfFile?.map((list, index) => {
+              const url = new URL(list?.elevation_urls[0])
+              const name = url.pathname.split('/').pop()
+              return (
               <div key={index} style={{ margin: '12px' }}>
-                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>{list.elevation_urls[0]}</p>
+                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>{name}</p>
               </div>
-            ))}
+            )
+            })}
           </div>)
         }
       </div>
