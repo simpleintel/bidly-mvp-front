@@ -82,23 +82,31 @@ const IndexPage = () => {
               },
             })
             let fetchResponse
-            if (detectResponse.data.task_id !== null || detectResponse.data.task_id !== '') {
-              fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`)
 
-              while (fetchResponse.data.result === null) {
-                fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`)
-                setPdfFile(fetchResponse.data.result);
-
+            try{
+              if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
+                fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`);
+  
+                while (fetchResponse.data.result === null) {
+                  await new Promise(resolve => setTimeout(resolve, 5000));
+                  fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`);
+                  setPdfFile(fetchResponse.data.result);
+                }
+              }
+  
+              if (fetchResponse?.data.result !== null) {
+                setIsLoading(false);
+  
+                openNotificationWithIcon('success')
+              } else {
+                openNotificationWithIcon('error')
               }
             }
-
-            if (fetchResponse?.data.result !== null) {
-              setIsLoading(false);
-
-              openNotificationWithIcon('success')
-            } else {
+            catch (e){
+              console.log('error', e)
               openNotificationWithIcon('error')
-            }
+            
+            } 
           }
 
         }
@@ -187,10 +195,10 @@ const IndexPage = () => {
               const url = new URL(list?.elevation_urls[0])
               const name = url.pathname.split('/').pop()
               return (
-              <div key={index} style={{ margin: '12px' }}>
-                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>{name}</p>
-              </div>
-            )
+                <div key={index} style={{ margin: '12px' }}>
+                  <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>{name}</p>
+                </div>
+              )
             })}
           </div>)
         }
