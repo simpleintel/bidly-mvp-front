@@ -74,39 +74,59 @@ const IndexPage = () => {
 
           }
           if (clientSend) {
-            formData.append('pdf_url', info.fileList[0].originFileObj.name);
-            const detectResponse = await axios.post('http://34.203.12.157:5000/detect', formData, {
+            formData.append('pdf_url', info.fileList[0].originFileObj);
+
+            const config = {
               headers: {
                 'Content-Type': 'multipart/form-data',
-                'Authorization': 'xxx'
+                'Authorization': 'xxx',
               },
-            })
-            let fetchResponse
+            };
 
-            try{
-              if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
-                fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`);
-  
-                while (fetchResponse.data.result === null) {
-                  await new Promise(resolve => setTimeout(resolve, 5000));
-                  fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`);
-                  setPdfFile(fetchResponse.data.result);
+            try {
+              const response = await axios.post('http://34.203.12.157:5000/detect', formData, config);
+              const taskId = response.data.taskId;
+              const checkStatus = async () => {
+                const detectResponse = await axios.get(`http://34.203.12.157:5000/check-status/${taskId}`, config);
+
+                if (detectResponse.data.task_id !== null) {
+                  let fetchResponse
+
+                  try {
+                    if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
+                      fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`);
+
+                      while (fetchResponse.data.result === null) {
+                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`);
+                        setPdfFile(fetchResponse.data.result);
+                      }
+                    }
+
+                    if (fetchResponse?.data.result !== null) {
+                      setIsLoading(false);
+
+                      openNotificationWithIcon('success')
+                    } else {
+                      openNotificationWithIcon('error')
+                    }
+                  }
+                  catch (e) {
+                    console.log('error', e)
+                    openNotificationWithIcon('error')
+
+                  }
+                } else {
+                
+                  setTimeout(checkStatus, 1000);
                 }
-              }
-  
-              if (fetchResponse?.data.result !== null) {
-                setIsLoading(false);
-  
-                openNotificationWithIcon('success')
-              } else {
-                openNotificationWithIcon('error')
-              }
+              };
+
+              checkStatus();
+            } catch (error) {
+              console.error('Error during file upload:', error);
             }
-            catch (e){
-              console.log('error', e)
-              openNotificationWithIcon('error')
-            
-            } 
+
           }
 
         }
