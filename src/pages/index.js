@@ -74,7 +74,8 @@ const IndexPage = () => {
 
           }
           if (clientSend) {
-            formData.append('pdf_url', info.fileList[0].originFileObj);
+            const formDataEndpoint = new FormData();
+            formDataEndpoint.append('pdf_url', info.fileList[0].originFileObj.name);
 
             const config = {
               headers: {
@@ -84,7 +85,7 @@ const IndexPage = () => {
             };
 
             try {
-              const response = await axios.post('http://34.203.12.157:5000/detect', formData, config);
+              const response = await axios.post('http://34.203.12.157:5000/detect', formDataEndpoint, config);
               const taskId = response.data.taskId;
               const checkStatus = async () => {
                 const detectResponse = await axios.get(`http://34.203.12.157:5000/check-status/${taskId}`, config);
