@@ -74,8 +74,9 @@ const IndexPage = () => {
 
           }
           if (clientSend) {
-            formData.append('pdf_url', info.fileList[0].originFileObj.name);
-            const detectResponse = await axios.post('http://34.203.12.157:5000/detect', formData, {
+            const formDataEndpoint = new FormData();
+            formDataEndpoint.append('pdf_url', info.fileList[0].originFileObj.name);
+            const detectResponse = await axios.post('http://34.203.12.157:5000/detect', formDataEndpoint, {
               headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': 'xxx'
