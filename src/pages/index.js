@@ -171,22 +171,40 @@ const IndexPage = () => {
         {isPdfView ? (
           <div style={{ width: '90%', margin: 'auto' }}>
             <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
-            <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-              {pdfDisplayList?.elevation_urls?.map((list, index) => (
-                <div key={index} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
-                  <div style={{ marginRight: '18px' }}>
-                    <Image
-                      width={500}
-                      src={list}
-                      style={{ marginLeft: '16px' }}
-                    />
-                    <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[index]}</p>
-                    <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num}</p>
+            <div>
+              <h2 style={{ textAlign: 'center' }}>Elevation section</h2>
+              <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                {pdfDisplayList?.elevation_urls?.map((list, index) => (
+                  <div key={index} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
+                    <div style={{ marginRight: '18px' }}>
+                      <Image
+                        width={500}
+                        src={list}
+                        style={{ marginLeft: '16px' }}
+                      />
+                      <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[index]}</p>
+                      <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-
+            <div>
+              <h2 style={{ textAlign: 'center' }}>Bathroom section</h2>
+              <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                {pdfDisplayList?.bath_urls?.map((list, index) => (
+                  <div key={index} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
+                    <div style={{ marginRight: '18px' }}>
+                      <Image
+                        width={500}
+                        src={list}
+                        style={{ marginLeft: '16px' }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )
           :
