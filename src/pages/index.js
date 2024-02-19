@@ -17,10 +17,10 @@ const IndexPage = () => {
 
   const [uid, setUid] = useState(null);
 
-  const bucketName = 'bidly-data'
+  const bucketName = 'bidly-data-new'
   const bucketRegion = 'us-east-1'
-  const accessKey = 'AKIAZDO4IOGWVVK7DRX4'
-  const secretAccessKey = `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`
+  const accessKey = 'AKIAQP4Y5NIN5JARZXPA'
+  const secretAccessKey = `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`
   const client = new S3Client({
     credentials: {
       accessKeyId: accessKey,
@@ -76,7 +76,7 @@ const IndexPage = () => {
           if (clientSend) {
             const formDataEndpoint = new FormData();
             formDataEndpoint.append('pdf_url', info.fileList[0].originFileObj.name);
-            const detectResponse = await axios.post('http://34.203.12.157:5000/detect', formDataEndpoint, {
+            const detectResponse = await axios.post('http://52.91.53.52:5000/detect', formDataEndpoint, {
               headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': 'xxx'
@@ -86,11 +86,11 @@ const IndexPage = () => {
 
             try{
               if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
-                fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`);
+                fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
   
                 while (fetchResponse.data.result === null) {
                   await new Promise(resolve => setTimeout(resolve, 5000));
-                  fetchResponse = await axios.get(`http://34.203.12.157:5000/fetch_result/${detectResponse?.data?.task_id}`);
+                  fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
                   setPdfFile(fetchResponse.data.result);
                 }
               }
