@@ -201,7 +201,7 @@ const IndexPage = () => {
                         src={list}
                         style={{ marginLeft: '16px' }}
                       />
-                      <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath-cabinets[index]}</p>
+                      <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[index]}</p>
                       <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num}</p>
                     </div>
                   </div>
