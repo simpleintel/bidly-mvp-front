@@ -84,30 +84,30 @@ const IndexPage = () => {
             })
             let fetchResponse
 
-            try{
+            try {
               if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
                 fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
-  
+
                 while (fetchResponse.data.result === null) {
                   await new Promise(resolve => setTimeout(resolve, 5000));
                   fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
                   setPdfFile(fetchResponse.data.result);
                 }
               }
-  
+
               if (fetchResponse?.data.result !== null) {
                 setIsLoading(false);
-  
+
                 openNotificationWithIcon('success')
               } else {
                 openNotificationWithIcon('error')
               }
             }
-            catch (e){
+            catch (e) {
               console.log('error', e)
               openNotificationWithIcon('error')
-            
-            } 
+
+            }
           }
 
         }
@@ -137,6 +137,7 @@ const IndexPage = () => {
   };
 
   const handlePdflists = (list) => {
+    console.log(list)
     setPdfDisplayList(list)
     setIsPdfView(true)
 
@@ -200,6 +201,8 @@ const IndexPage = () => {
                         src={list}
                         style={{ marginLeft: '16px' }}
                       />
+                      <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath-cabinets[index]}</p>
+                      <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num}</p>
                     </div>
                   </div>
                 ))}
