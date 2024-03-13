@@ -216,6 +216,8 @@ const IndexPage = () => {
             {pdfFile?.map((list, index) => (
               <div key={index} style={{ margin: '12px' }}>
                 <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Page number: {list.page_num}</p>
+                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Kitchen Cabinets: {list.num_bath_cabinets?.reduce((total, amount) => total + amount)}</p>
+                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Bathroom Cabinets: {list.num_cabinet?.reduce((total, amount) => total + amount)}</p>
               </div>
             )
             )}
