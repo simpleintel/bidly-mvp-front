@@ -185,6 +185,7 @@ const IndexPage = () => {
                       />
                       <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[index]}</p>
                       <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num}</p>
+                      <a href={pdfDisplayList.page_urls} target="_blank"><span style={{ fontWeight: 'bold' }}>Open Page</span></a>
                     </div>
                   </div>
                 ))}
