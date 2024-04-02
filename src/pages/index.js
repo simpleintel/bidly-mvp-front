@@ -184,7 +184,7 @@ const IndexPage = () => {
                         style={{ marginLeft: '16px' }}
                       />
                       <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[index]}</p>
-                      <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num}</p>
+                      <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num + 1}</p>
                       <a href={pdfDisplayList.page_urls} target="_blank"><span style={{ fontWeight: 'bold' }}>Open Page</span></a>
                     </div>
                   </div>
@@ -203,7 +203,7 @@ const IndexPage = () => {
                         style={{ marginLeft: '16px' }}
                       />
                       <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[index]}</p>
-                      <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num}</p>
+                      <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num + 1}</p>
                       <a href={pdfDisplayList.page_urls} target="_blank"><span style={{ fontWeight: 'bold' }}>Open Page</span></a>
                     </div>
                   </div>
@@ -217,7 +217,7 @@ const IndexPage = () => {
           (<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
             {pdfFile?.map((list, index) => (
               <div key={index} style={{ margin: '12px' }}>
-                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Page number: {list.page_num}</p>
+                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Page number: {list.page_num + 1}</p>
                 <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Kitchen Cabinets: {list?.num_cabinet?.length != 0 ? list?.num_cabinet?.reduce((total, amount) => total + amount) : 0}</p>
                 <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Bathroom Cabinets: {list?.num_bath_cabinets?.length != 0 ? list?.num_bath_cabinets?.reduce((total, amount) => total + amount) : 0}</p>
               </div>
