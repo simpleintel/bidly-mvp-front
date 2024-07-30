@@ -1,79 +1,68 @@
-import { useState } from "react"
-import React from 'react';
-import axios from 'axios'
+import React, { useState } from 'react';
+import axios from 'axios';
 import { UploadOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { Button, message, Upload, notification } from 'antd';
-import { Image, Spin } from 'antd';
+import { Button, message, Upload, notification, Image, Spin, Table } from 'antd';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const IndexPage = () => {
-  const [pdfFile, setPdfFile] = useState([])
-  const [fileList, setFileList] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [pdfFile, setPdfFile] = useState([]);
+  const [fileList, setFileList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [api, contextHolder] = notification.useNotification();
   const [uploadInProgress, setUploadInProgress] = useState(false);
-  const [isPdfView, setIsPdfView] = useState(false)
-  const [pdfDisplayList, setPdfDisplayList] = useState([])
-
+  const [isPdfView, setIsPdfView] = useState(false);
+  const [pdfDisplayList, setPdfDisplayList] = useState(null);
   const [uid, setUid] = useState(null);
 
-  const bucketName = 'bidly-data-new'
-  const bucketRegion = 'us-east-1'
-  const accessKey = 'AKIAQP4Y5NIN5JARZXPA'
-  const secretAccessKey = `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`
+  const getImageUrl = (path) => {
+    // Assuming the backend now sends paths like 'media/task/1.png'
+    return `http://127.0.0.1:5001/${path}`;
+  };
+
+  const bucketName = 'bidly-data-new';
+  const bucketRegion = 'us-east-1';
+  const accessKey = 'AKIAQP4Y5NIN5JARZXPA';
+  const secretAccessKey = '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';
+  
   const client = new S3Client({
     credentials: {
       accessKeyId: accessKey,
-      secretAccessKey: String(secretAccessKey)
+      secretAccessKey: secretAccessKey
     },
     region: bucketRegion
   });
 
   const props = {
-
     beforeUpload(file) {
-
-      const isPNG = file.type === 'application/pdf';
-      if (!isPNG) {
+      const isPDF = file.type === 'application/pdf';
+      if (!isPDF) {
         message.error(`${file.name} is not a PDF file`);
       }
-      return isPNG || Upload.LIST_IGNORE;
+      return isPDF || Upload.LIST_IGNORE;
     },
     async onChange(info) {
-
       if (uploadInProgress && uid === info.file.uid) {
         return;
       }
       setUploadInProgress(true);
-      setIsLoading(true)
-      setUid(info.file.uid)
-      let clientSend;
+      setIsLoading(true);
+      setUid(info.file.uid);
+
       if (uid !== info.file.uid && info.fileList.length > 0) {
         const formData = new FormData();
         formData.append('pdf_url', info.fileList[0].originFileObj);
 
-        // formData.append('pdf_url', fs.createReadStream(info.fileList[0].originFileObj));
-        if (info) {
-          const params = {
-            Bucket: bucketName,
-            Key: info.fileList[0].originFileObj.name,
-            Body: formData,
-          };
-          const command = new PutObjectCommand(params);
-          try {
-            clientSend = await client.send(command);
-          } catch (error) {
-            console.log('error', error)
-          }
+        const params = {
+          Bucket: bucketName,
+          Key: info.fileList[0].originFileObj.name,
+          Body: formData,
+        };
+        const command = new PutObjectCommand(params);
+        
+        try {
+          const clientSend = await client.send(command);
           if (clientSend) {
-            openNotificationWithIcon('success')
-
-
-          } else {
-            openNotificationWithIcon('error')
-
-          }
-          if (clientSend) {
+            openNotificationWithIcon('success');
             const formDataEndpoint = new FormData();
             formDataEndpoint.append('pdf_url', info.fileList[0].originFileObj.name);
             const detectResponse = await axios.post('http://52.91.53.52:5000/detect', formDataEndpoint, {
@@ -81,55 +70,46 @@ const IndexPage = () => {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': 'xxx'
               },
-            })
-            let fetchResponse
+            });
 
             try {
               if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
-                fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
+              fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
 
-                while (fetchResponse.data.result === null) {
-                  await new Promise(resolve => setTimeout(resolve, 5000));
-                  fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
-                  setPdfFile(fetchResponse.data.result);
+              while (fetchResponse.data.result === null) {
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
+setPdfFile(fetchResponse.data.result);
                 }
               }
 
-              if (fetchResponse?.data.result !== null) {
+              if (fetchResponse.data.result) {
+                setPdfFile([fetchResponse.data.result]);
                 setIsLoading(false);
-
-                openNotificationWithIcon('success')
-              } else {
-                openNotificationWithIcon('error')
+                openNotificationWithIcon('success');
+              
               }
+              
             }
-            catch (e) {
-              console.log('error', e)
-              openNotificationWithIcon('error')
-
-            }
+            catch {
+              openNotificationWithIcon('error');
+          } 
           }
-
+        } catch (error) {
+          console.error('Error:', error);
+          openNotificationWithIcon('error');
         }
       }
+      setUploadInProgress(false);
     }
-
-  }
-
+  };
 
   const onRemove = (file) => {
     setFileList(fileList.filter((f) => f !== file));
   };
 
   const openNotificationWithIcon = (type) => {
-    let message;
-
-    if (type === 'success') {
-      message = 'Successfully Upload';
-    } else if (type === 'error') {
-      message = 'No pdf display data!';
-    }
-
+    const message = type === 'success' ? 'Successfully Upload' : 'No pdf display data!';
     api[type]({
       message,
       description: '',
@@ -137,99 +117,163 @@ const IndexPage = () => {
   };
 
   const handlePdflists = (list) => {
-    console.log(list)
-    setPdfDisplayList(list)
-    setIsPdfView(true)
-
-  }
+    setPdfDisplayList(list);
+    setIsPdfView(true);
+  };
 
   const handleReturn = () => {
-    setIsPdfView(false)
+    setIsPdfView(false);
+  };
 
-  }
+  const columns = [
+    {
+      title: 'Image',
+      dataIndex: 'image_used',
+      key: 'image',
+      render: (image) => (
+        <Image
+          width={200}
+          src={getImageUrl(image)}
+          style={{ objectFit: 'cover' }}
+        />
+      ),
+    },
+    {
+      title: 'Unit Type',
+      dataIndex: ['api_response', 'unit-type'],
+      key: 'unit-type',
+    },
+    {
+      title: 'Base Cabinet Linear ft',
+      dataIndex: ['api_response', 'base-cabinet-linear-ft'],
+      key: 'base-cabinet-linear-ft',
+    },
+    {
+      title: 'Wall Cabinet Linear ft',
+      dataIndex: ['api_response', 'wall-cabinet-linear-ft'],
+      key: 'wall-cabinet-linear-ft',
+    },
+  ];
+
+  const pricingColumns = [
+    {
+      title: 'Unit Number',
+      dataIndex: 'unit number',
+      key: 'unit number',
+    },
+    {
+      title: 'Cost',
+      dataIndex: 'cost',
+      key: 'cost',
+    },
+    {
+      title: 'Number of Units',
+      dataIndex: 'number_of_units',
+      key: 'number_of_units',
+    },
+    {
+      title: 'Total',
+      dataIndex: 'total',
+      key: 'total',
+    },
+  ];
+
   return (
-
-    <div >
-
+    <div>
       {contextHolder}
       <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-        <h1>
-          Upload PDF File
-          <br />
-        </h1>
+        <h1>Upload PDF File</h1>
         <div style={{ width: '200px', margin: 'auto' }}>
-
-          <Upload  {...props} onRemove={onRemove} maxCount={1}>
+          <Upload {...props} onRemove={onRemove} maxCount={1}>
             <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
           </Upload>
-
+                 
           {isLoading && <Spin style={{ marginTop: '24px', marginBottom: '24px' }} size="large" />}
-
         </div>
       </div>
-      <div >
-
-        {isPdfView ? (
-          <div style={{ width: '90%', margin: 'auto' }}>
-            <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
-            <div>
-              <h2 style={{ textAlign: 'center' }}>Elevation section</h2>
-              <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                {pdfDisplayList?.elevation_urls?.map((list, index) => (
-                  <div key={index} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
-                    <div style={{ marginRight: '18px' }}>
-                      <Image
-                        width={500}
-                        src={list}
-                        style={{ marginLeft: '16px' }}
-                      />
-                      <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[index]}</p>
-                      <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num + 1}</p>
-                      <a href={pdfDisplayList.page_urls} target="_blank"><span style={{ fontWeight: 'bold' }}>Open Page</span></a>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      
+      {pdfFile.length > 0 && !isPdfView && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
+          {pdfFile.map((list, index) => (
+            <div key={index} style={{ margin: '12px' }}>
+              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>Page number: {index + 1}</p>
+              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>
+                Kitchen Cabinets: {list.num_cabinet[0].reduce((total, amount) => total + amount, 0)}
+              </p>
+              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>
+                Bathroom Cabinets: {list.num_bath_cabinets[0].reduce((total, amount) => total + amount, 0)}
+              </p>
             </div>
-            <div>
-              <h2 style={{ textAlign: 'center' }}>Bathroom section</h2>
-              <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                {pdfDisplayList?.bath_urls?.map((list, index) => (
-                  <div key={index} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
-                    <div style={{ marginRight: '18px' }}>
-                      <Image
-                        width={500}
-                        src={list}
-                        style={{ marginLeft: '16px' }}
-                      />
-                      <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[index]}</p>
-                      <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {pdfDisplayList.page_num + 1}</p>
-                      <a href={pdfDisplayList.page_urls} target="_blank"><span style={{ fontWeight: 'bold' }}>Open Page</span></a>
-                    </div>
+          ))}
+        </div>
+      )}
+
+      {pdfFile.length > 0 && !isPdfView && (
+        <div style={{ width: '90%', margin: 'auto' }}>
+          <div>
+            <h2 style={{ textAlign: 'center' }}>Unit-Level-Measurement</h2>
+            <Table 
+              dataSource={pdfFile[0].openai_response}
+              columns={columns} 
+              pagination={false}
+              style={{ marginBottom: '24px' }}
+            />
+          </div>
+          <div>
+            <h2 style={{ textAlign: 'center' }}>Calculation</h2>
+            <Table 
+              dataSource={pdfFile[0]['pricing Table']}
+              columns={pricingColumns} 
+              pagination={false}
+              style={{ marginBottom: '24px' }}
+            />
+          </div>
+        </div>
+      )}
+      
+      {isPdfView && pdfDisplayList && (
+        <div style={{ width: '90%', margin: 'auto' }}>
+          <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
+          <div>
+            <h2 style={{ textAlign: 'center' }}>Elevation section</h2>
+            <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+              {pdfDisplayList.page_urls[0].map((url, i) => (
+                <div key={i} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
+                  <div style={{ marginRight: '18px' }}>
+                    <Image
+                      width={500}
+                      src={getImageUrl(url)}
+                      style={{ marginLeft: '16px' }}
+                    />
+                    <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[0][i]}</p>
+                    <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {i + 1}</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
-        )
-          :
-
-          (<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
-            {pdfFile?.map((list, index) => (
-              <div key={index} style={{ margin: '12px' }}>
-                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Page number: {list.page_num + 1}</p>
-                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Kitchen Cabinets: {list?.num_cabinet?.length != 0 ? list?.num_cabinet?.reduce((total, amount) => total + amount) : 0}</p>
-                <p style={{ color: 'blue', cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} onClick={() => handlePdflists(list)}>Bathroom Cabinets: {list?.num_bath_cabinets?.length != 0 ? list?.num_bath_cabinets?.reduce((total, amount) => total + amount) : 0}</p>
-              </div>
-            )
-            )}
-          </div>)
-        }
-      </div>
-
+          <div>
+            <h2 style={{ textAlign: 'center' }}>Bathroom section</h2>
+            <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+              {pdfDisplayList.bath_urls[0].map((url, index) => (
+                <div key={index} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
+                  <div style={{ marginRight: '18px' }}>
+                    <Image
+                      width={500}
+                      src={getImageUrl(url)}
+                      style={{ marginLeft: '16px' }}
+                    />
+                    <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[0][index]}</p>
+                    <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {index + 1}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+};
 
-  )
-}
-
-export default IndexPage
+export default IndexPage;
