@@ -6,7 +6,6 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const IndexPage = () => {
   const [pdfFile, setPdfFile] = useState([]);
-  const [fileList, setFileList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [api, contextHolder] = notification.useNotification();
   const [uploadInProgress, setUploadInProgress] = useState(false);
@@ -14,15 +13,11 @@ const IndexPage = () => {
   const [pdfDisplayList, setPdfDisplayList] = useState(null);
   const [uid, setUid] = useState(null);
 
-  const getImageUrl = (path) => {
-    // Assuming the backend now sends paths like 'media/task/1.png'
-    return `http://127.0.0.1:5001/${path}`;
-  };
-
   const bucketName = 'bidly-data-new';
   const bucketRegion = 'us-east-1';
   const accessKey = 'AKIAQP4Y5NIN5JARZXPA';
   const secretAccessKey = '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';
+
 
   const client = new S3Client({
     credentials: {
@@ -55,7 +50,7 @@ const IndexPage = () => {
         const params = {
           Bucket: bucketName,
           Key: info.fileList[0].originFileObj.name,
-          Body: formData,
+          Body: info.fileList[0].originFileObj,
         };
         const command = new PutObjectCommand(params);
 
@@ -71,22 +66,22 @@ const IndexPage = () => {
                 'Authorization': 'xxx'
               },
             });
-            let fetchResponse
+let fetchResponse
             try {
               if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
                 fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
-
-                while (fetchResponse.data.result === null) {
-                  await new Promise(resolve => setTimeout(resolve, 5000));
-                  fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
-                  setPdfFile(fetchResponse.data.result);
+            
+            while (fetchResponse.data.result === null) {
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
+              setPdfFile(fetchResponse.data.result);
                 }
               }
 
               if (fetchResponse.data.result) {
-                setPdfFile([fetchResponse.data.result]);
-                setIsLoading(false);
-                openNotificationWithIcon('success');
+              setPdfFile([fetchResponse.data.result]);
+              setIsLoading(false);
+              openNotificationWithIcon('success');
 
               }
 
@@ -133,7 +128,7 @@ const IndexPage = () => {
       render: (image) => (
         <Image
           width={200}
-          src={getImageUrl(image)}
+          src={image}
           style={{ objectFit: 'cover' }}
         />
       ),
@@ -184,7 +179,7 @@ const IndexPage = () => {
       <div style={{ textAlign: 'center', marginBottom: '36px' }}>
         <h1>Upload PDF File</h1>
         <div style={{ width: '200px', margin: 'auto' }}>
-          <Upload {...props} onRemove={onRemove} maxCount={1}>
+          <Upload {...props} maxCount={1}>
             <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
           </Upload>
 
@@ -242,7 +237,7 @@ const IndexPage = () => {
                   <div style={{ marginRight: '18px' }}>
                     <Image
                       width={500}
-                      src={getImageUrl(url)}
+                      src={url}
                       style={{ marginLeft: '16px' }}
                     />
                     <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[0][i]}</p>
@@ -260,7 +255,7 @@ const IndexPage = () => {
                   <div style={{ marginRight: '18px' }}>
                     <Image
                       width={500}
-                      src={getImageUrl(url)}
+                      src={url}
                       style={{ marginLeft: '16px' }}
                     />
                     <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[0][index]}</p>
