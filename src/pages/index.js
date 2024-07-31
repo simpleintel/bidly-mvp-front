@@ -128,7 +128,7 @@ const IndexPage = () => {
       render: (image) => (
         <Image
           width={200}
-          src={"http://52.91.53.52:5000/" + url}
+          src={"http://52.91.53.52:5000/" + image}
           style={{ objectFit: 'cover' }}
         />
       ),
