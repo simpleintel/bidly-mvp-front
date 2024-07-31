@@ -18,7 +18,7 @@ const IndexPage = () => {
   const bucketRegion = 'us-east-1';
   const accessKey = 'AKIAQP4Y5NIN5JARZXPA';
   const secretAccessKey = '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';
-  
+
   const client = new S3Client({
     credentials: {
       accessKeyId: accessKey,
@@ -53,7 +53,7 @@ const IndexPage = () => {
           Body: formData,
         };
         const command = new PutObjectCommand(params);
-        
+
         try {
           const clientSend = await client.send(command);
           if (clientSend) {
@@ -66,15 +66,15 @@ const IndexPage = () => {
                 'Authorization': 'xxx'
               },
             });
-
+            let fetchResponse
             try {
               if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
-              fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
-
-              while (fetchResponse.data.result === null) {
-                await new Promise(resolve => setTimeout(resolve, 5000));
                 fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
-setPdfFile(fetchResponse.data.result);
+
+                while (fetchResponse.data.result === null) {
+                  await new Promise(resolve => setTimeout(resolve, 5000));
+                  fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
+                  setPdfFile(fetchResponse.data.result);
                 }
               }
 
@@ -82,13 +82,13 @@ setPdfFile(fetchResponse.data.result);
                 setPdfFile([fetchResponse.data.result]);
                 setIsLoading(false);
                 openNotificationWithIcon('success');
-              
+
               }
-              
+
             }
             catch {
               openNotificationWithIcon('error');
-          } 
+            }
           }
         } catch (error) {
           console.error('Error:', error);
@@ -182,11 +182,11 @@ setPdfFile(fetchResponse.data.result);
           <Upload {...props} onRemove={onRemove} maxCount={1}>
             <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
           </Upload>
-                 
+
           {isLoading && <Spin style={{ marginTop: '24px', marginBottom: '24px' }} size="large" />}
         </div>
       </div>
-      
+
       {pdfFile.length > 0 && !isPdfView && (
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
           {pdfFile.map((list, index) => (
@@ -207,25 +207,25 @@ setPdfFile(fetchResponse.data.result);
         <div style={{ width: '90%', margin: 'auto' }}>
           <div>
             <h2 style={{ textAlign: 'center' }}>Unit-Level-Measurement</h2>
-            <Table 
+            <Table
               dataSource={pdfFile[0].openai_response}
-              columns={columns} 
+              columns={columns}
               pagination={false}
               style={{ marginBottom: '24px' }}
             />
           </div>
           <div>
             <h2 style={{ textAlign: 'center' }}>Calculation</h2>
-            <Table 
+            <Table
               dataSource={pdfFile[0]['pricing Table']}
-              columns={pricingColumns} 
+              columns={pricingColumns}
               pagination={false}
               style={{ marginBottom: '24px' }}
             />
           </div>
         </div>
       )}
-      
+
       {isPdfView && pdfDisplayList && (
         <div style={{ width: '90%', margin: 'auto' }}>
           <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
