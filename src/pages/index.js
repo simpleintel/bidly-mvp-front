@@ -187,9 +187,9 @@ const IndexPage = () => {
         </div>
       </div>
 
-      {pdfFile.length > 0 && !isPdfView && (
+      {pdfFile?.length > 0 && !isPdfView && (
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
-          {pdfFile.map((list, index) => (
+          {pdfFile?.map((list, index) => (
             <div key={index} style={{ margin: '12px' }}>
               <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>Page number: {index + 1}</p>
               <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>
@@ -203,7 +203,7 @@ const IndexPage = () => {
         </div>
       )}
 
-      {pdfFile.length > 0 && !isPdfView && (
+      {pdfFile?.length > 0 && !isPdfView && (
         <div style={{ width: '90%', margin: 'auto' }}>
           <div>
             <h2 style={{ textAlign: 'center' }}>Unit-Level-Measurement</h2>
