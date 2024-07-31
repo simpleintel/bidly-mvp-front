@@ -6,6 +6,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const IndexPage = () => {
   const [pdfFile, setPdfFile] = useState([]);
+  const [fileList, setFileList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [api, contextHolder] = notification.useNotification();
   const [uploadInProgress, setUploadInProgress] = useState(false);
@@ -17,8 +18,7 @@ const IndexPage = () => {
   const bucketRegion = 'us-east-1';
   const accessKey = 'AKIAQP4Y5NIN5JARZXPA';
   const secretAccessKey = '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';
-
-
+  
   const client = new S3Client({
     credentials: {
       accessKeyId: accessKey,
@@ -50,10 +50,10 @@ const IndexPage = () => {
         const params = {
           Bucket: bucketName,
           Key: info.fileList[0].originFileObj.name,
-          Body: info.fileList[0].originFileObj,
+          Body: formData,
         };
         const command = new PutObjectCommand(params);
-
+        
         try {
           const clientSend = await client.send(command);
           if (clientSend) {
@@ -66,29 +66,29 @@ const IndexPage = () => {
                 'Authorization': 'xxx'
               },
             });
-let fetchResponse
+
             try {
               if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
-                fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
-            
-            while (fetchResponse.data.result === null) {
+              fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
+
+              while (fetchResponse.data.result === null) {
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
-              setPdfFile(fetchResponse.data.result);
+setPdfFile(fetchResponse.data.result);
                 }
               }
 
               if (fetchResponse.data.result) {
-              setPdfFile([fetchResponse.data.result]);
-              setIsLoading(false);
-              openNotificationWithIcon('success');
-
+                setPdfFile([fetchResponse.data.result]);
+                setIsLoading(false);
+                openNotificationWithIcon('success');
+              
               }
-
+              
             }
             catch {
               openNotificationWithIcon('error');
-            }
+          } 
           }
         } catch (error) {
           console.error('Error:', error);
@@ -179,17 +179,17 @@ let fetchResponse
       <div style={{ textAlign: 'center', marginBottom: '36px' }}>
         <h1>Upload PDF File</h1>
         <div style={{ width: '200px', margin: 'auto' }}>
-          <Upload {...props} maxCount={1}>
+          <Upload {...props} onRemove={onRemove} maxCount={1}>
             <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
           </Upload>
-
+                 
           {isLoading && <Spin style={{ marginTop: '24px', marginBottom: '24px' }} size="large" />}
         </div>
       </div>
-
-      {pdfFile?.length > 0 && !isPdfView && (
+      
+      {pdfFile.length > 0 && !isPdfView && (
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
-          {pdfFile?.map((list, index) => (
+          {pdfFile.map((list, index) => (
             <div key={index} style={{ margin: '12px' }}>
               <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>Page number: {index + 1}</p>
               <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>
@@ -203,29 +203,29 @@ let fetchResponse
         </div>
       )}
 
-      {pdfFile?.length > 0 && !isPdfView && (
+      {pdfFile.length > 0 && !isPdfView && (
         <div style={{ width: '90%', margin: 'auto' }}>
           <div>
             <h2 style={{ textAlign: 'center' }}>Unit-Level-Measurement</h2>
-            <Table
+            <Table 
               dataSource={pdfFile[0].openai_response}
-              columns={columns}
+              columns={columns} 
               pagination={false}
               style={{ marginBottom: '24px' }}
             />
           </div>
           <div>
             <h2 style={{ textAlign: 'center' }}>Calculation</h2>
-            <Table
+            <Table 
               dataSource={pdfFile[0]['pricing Table']}
-              columns={pricingColumns}
+              columns={pricingColumns} 
               pagination={false}
               style={{ marginBottom: '24px' }}
             />
           </div>
         </div>
       )}
-
+      
       {isPdfView && pdfDisplayList && (
         <div style={{ width: '90%', margin: 'auto' }}>
           <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
