@@ -128,7 +128,7 @@ const IndexPage = () => {
       render: (image) => (
         <Image
           width={200}
-          src={"http://52.91.53.52:5000/" + image}
+          src={image}
           style={{ objectFit: 'cover' }}
         />
       ),
@@ -237,7 +237,7 @@ const IndexPage = () => {
                   <div style={{ marginRight: '18px' }}>
                     <Image
                       width={500}
-                      src={"http://52.91.53.52:5000/" + url}
+                      src={url}
                       style={{ marginLeft: '16px' }}
                     />
                     <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[0][i]}</p>
@@ -255,7 +255,7 @@ const IndexPage = () => {
                   <div style={{ marginRight: '18px' }}>
                     <Image
                       width={500}
-                      src={"http://52.91.53.52:5000/" + url}
+                      src={url}
                       style={{ marginLeft: '16px' }}
                     />
                     <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[0][index]}</p>
