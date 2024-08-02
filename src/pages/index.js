@@ -113,6 +113,7 @@ const IndexPage = () => {
 
   const handlePdflists = (list) => {
     setPdfDisplayList(list);
+    console.log(list)
     setIsPdfView(true);
   };
 
@@ -232,7 +233,7 @@ const IndexPage = () => {
           <div>
             <h2 style={{ textAlign: 'center' }}>Elevation section</h2>
             <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-              {pdfDisplayList.page_urls[0].map((url, i) => (
+              {pdfDisplayList.page_urls.map((url, i) => (
                 <div key={i} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
                   <div style={{ marginRight: '18px' }}>
                     <Image
@@ -250,7 +251,7 @@ const IndexPage = () => {
           <div>
             <h2 style={{ textAlign: 'center' }}>Bathroom section</h2>
             <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-              {pdfDisplayList.bath_urls[0].map((url, index) => (
+              {pdfDisplayList.bath_urls.map((url, index) => (
                 <div key={index} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
                   <div style={{ marginRight: '18px' }}>
                     <Image
