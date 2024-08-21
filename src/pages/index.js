@@ -68,8 +68,10 @@ const IndexPage = () => {
             });
             let fetchResponse
             try {
+
               if (detectResponse.data.task_id !== null && detectResponse.data.task_id !== '') {
                 fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${detectResponse?.data?.task_id}`);
+                // fetchResponse = await axios.get(`http://52.91.53.52:5000/fetch_result/${3}`);
 
                 while (fetchResponse.data.result === null) {
                   await new Promise(resolve => setTimeout(resolve, 5000));
@@ -113,7 +115,6 @@ const IndexPage = () => {
 
   const handlePdflists = (list) => {
     setPdfDisplayList(list);
-    console.log(list)
     setIsPdfView(true);
   };
 
@@ -183,31 +184,33 @@ const IndexPage = () => {
           <Upload {...props} onRemove={onRemove} maxCount={1}>
             <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
           </Upload>
-
+  
           {isLoading && <Spin style={{ marginTop: '24px', marginBottom: '24px' }} size="large" />}
         </div>
       </div>
-
+  
       {pdfFile?.length > 0 && !isPdfView && (
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
-          {pdfFile?.map((list, index) => (
+          {pdfFile[0]?.results.map((page, index) => (
             <div key={index} style={{ margin: '12px' }}>
-              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>Page number: {index + 1}</p>
-              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>
-                Kitchen Cabinets: {list.num_cabinet[0].reduce((total, amount) => total + amount, 0)}
+              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(page)}>
+                Page number: {page.page_number}
               </p>
-              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(list)}>
-                Bathroom Cabinets: {list.num_bath_cabinets[0].reduce((total, amount) => total + amount, 0)}
+              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(page)}>
+                Kitchen Cabinets: {page.num_cabinet.reduce((total, amount) => total + amount, 0)}
+              </p>
+              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(page)}>
+                Bathroom Cabinets: {page.num_bath_cabinets.reduce((total, amount) => total + amount, 0)}
               </p>
             </div>
           ))}
         </div>
       )}
-
+  
       {pdfFile?.length > 0 && !isPdfView && (
         <div style={{ width: '90%', margin: 'auto' }}>
           <div>
-            <h2 style={{ textAlign: 'center' }}>Unit-Level-Measurement</h2>
+            <h2 style={{ textAlign: 'center' }}>Unit-Level Measurement</h2>
             <Table
               dataSource={pdfFile[0].openai_response}
               columns={columns}
@@ -218,7 +221,7 @@ const IndexPage = () => {
           <div>
             <h2 style={{ textAlign: 'center' }}>Calculation</h2>
             <Table
-              dataSource={pdfFile[0]['pricing Table']}
+              dataSource={pdfFile[0].pricing_table}
               columns={pricingColumns}
               pagination={false}
               style={{ marginBottom: '24px' }}
@@ -226,7 +229,7 @@ const IndexPage = () => {
           </div>
         </div>
       )}
-
+  
       {isPdfView && pdfDisplayList && (
         <div style={{ width: '90%', margin: 'auto' }}>
           <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
@@ -241,8 +244,8 @@ const IndexPage = () => {
                       src={url}
                       style={{ marginLeft: '16px' }}
                     />
-                    <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[0][i]}</p>
-                    <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {i + 1}</p>
+                    <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[i]}</p>
+                    <p><span style={{ fontWeight: 'bold' }}>Page Number:</span> {pdfDisplayList.page_number}</p>
                   </div>
                 </div>
               ))}
@@ -259,8 +262,8 @@ const IndexPage = () => {
                       src={url}
                       style={{ marginLeft: '16px' }}
                     />
-                    <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[0][index]}</p>
-                    <p><span style={{ fontWeight: 'bold' }}>Number of Page:</span> {index + 1}</p>
+                    <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[index]}</p>
+                    <p><span style={{ fontWeight: 'bold' }}>Page Number:</span> {pdfDisplayList.page_number}</p>
                   </div>
                 </div>
               ))}
@@ -270,6 +273,8 @@ const IndexPage = () => {
       )}
     </div>
   );
-};
+  
+  
+};  
 
 export default IndexPage;
