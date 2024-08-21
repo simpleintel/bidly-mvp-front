@@ -193,7 +193,7 @@ const IndexPage = () => {
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
           {pdfFile[0]?.results.map((page, index) => (
             <div key={index} style={{ margin: '12px' }}>
-              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(page)}>
+              <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => window.open(page.page_urls, '_blank')}>
                 Page number: {page.page_number}
               </p>
               <p style={{ color: 'blue', cursor: 'pointer' }} onClick={() => handlePdflists(page)}>
@@ -206,6 +206,7 @@ const IndexPage = () => {
           ))}
         </div>
       )}
+
   
       {pdfFile?.length > 0 && !isPdfView && (
         <div style={{ width: '90%', margin: 'auto' }}>
