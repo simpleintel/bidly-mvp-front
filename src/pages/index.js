@@ -233,7 +233,7 @@ const IndexPage = () => {
           <div>
             <h2 style={{ textAlign: 'center' }}>Elevation section</h2>
             <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-              {pdfDisplayList.page_urls.map((url, i) => (
+              {pdfDisplayList.elevation_urls.map((url, i) => (
                 <div key={i} style={{ flexBasis: 'calc(33.33% - 12px)', marginBottom: '24px' }}>
                   <div style={{ marginRight: '18px' }}>
                     <Image
