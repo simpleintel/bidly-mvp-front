@@ -184,11 +184,11 @@ const IndexPage = () => {
           <Upload {...props} onRemove={onRemove} maxCount={1}>
             <Button disabled={isLoading} icon={<UploadOutlined />}>Upload PDF only</Button>
           </Upload>
-  
+
           {isLoading && <Spin style={{ marginTop: '24px', marginBottom: '24px' }} size="large" />}
         </div>
       </div>
-  
+
       {pdfFile?.length > 0 && !isPdfView && (
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', width: '75%', margin: 'auto' }}>
           {pdfFile[0]?.results.map((page, index) => (
@@ -207,7 +207,7 @@ const IndexPage = () => {
         </div>
       )}
 
-  
+
       {pdfFile?.length > 0 && !isPdfView && (
         <div style={{ width: '90%', margin: 'auto' }}>
           <div>
@@ -230,7 +230,7 @@ const IndexPage = () => {
           </div>
         </div>
       )}
-  
+
       {isPdfView && pdfDisplayList && (
         <div style={{ width: '90%', margin: 'auto' }}>
           <ArrowLeftOutlined style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleReturn} />
@@ -246,7 +246,7 @@ const IndexPage = () => {
                       style={{ marginLeft: '16px' }}
                     />
                     <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_cabinet[i]}</p>
-                    <p><span style={{ fontWeight: 'bold' }}>Page Number:</span> {pdfDisplayList.page_number}</p>
+                    <a style={{ display: "table-cell" }} href={pdfDisplayList.page_urls} target="_blank"><p><span style={{ fontWeight: 'bold' }} >Page Number:</span> {pdfDisplayList.page_number}</p></a>
                   </div>
                 </div>
               ))}
@@ -264,7 +264,7 @@ const IndexPage = () => {
                       style={{ marginLeft: '16px' }}
                     />
                     <p><span style={{ fontWeight: 'bold' }}>Number of Cabinets:</span> {pdfDisplayList.num_bath_cabinets[index]}</p>
-                    <p><span style={{ fontWeight: 'bold' }}>Page Number:</span> {pdfDisplayList.page_number}</p>
+                    <a style={{ display: "table-cell" }} href={pdfDisplayList.page_urls} target="_blank"><p><span style={{ fontWeight: 'bold' }} >Page Number:</span> {pdfDisplayList.page_number}</p></a>
                   </div>
                 </div>
               ))}
@@ -274,8 +274,8 @@ const IndexPage = () => {
       )}
     </div>
   );
-  
-  
-};  
+
+
+};
 
 export default IndexPage;
